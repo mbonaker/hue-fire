@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>Hue Fire Popup</title>
+	<meta charset="utf-8" />
+	<link rel="stylesheet" href="color-picker.css" />
+	<script src="../node_modules/chroma-js/chroma.js"></script>
+	<script src="color-picker.js" type="module"></script>
+</head>
+<body>
+	<div class="pickers"></div>
+	<div class="fraction-picker">
+		<h3>Gradient</h3>
+		<div class="line">
+			<div class="canvas-container">
+			</div>
+			<div class="control">
+				<button class="more">+</button>
+				<button class="less">-</button>
+			</div>
+		</div>
+	</div>
+	<div class="color-list">
+		<h3>Colors:</h3>
+		<div class="values"></div>
+		<form class="input">
+			<input type="color" style="display: none;" />
+			<input type="text" />
+			<button type="submit">+</button>
+		</form>
+	</div>
+	<div class="color-set-selector">
+		<h3>Sets:</h3>
+		<div class="sets"></div>
+		<form class="new-selection">
+			<input type="text" />
+			<button type="submit">+</button>
+		</form>
+	</div>
+	<template id="color-item-template">
+		<div class="color" tabindex="0">
+			<div class="context-menu">
+				<button class="context-menu-action" data-action="copy-hex">Copy "<span class="set-content" data-content="hex"></span>"</button>
+				<button class="context-menu-action" data-action="copy-lch">Copy "<span class="set-content" data-content="lch"></span>" (LCH)</button>
+				<button class="context-menu-action" data-action="remove">Remove</button>
+				<button class="context-menu-action" data-action="gradient-1">Set as Gradient Start</button>
+				<button class="context-menu-action" data-action="gradient-2">Set as Gradient End</button>
+			</div>
+		</div>
+	</template>
+</body>
+</html>

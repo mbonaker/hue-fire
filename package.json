@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "chroma-js": "^2.1.2"
+  },
+  "name": "huefire",
+  "version": "0.0.0",
+  "description": "Adds a color picker that can work with HCL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

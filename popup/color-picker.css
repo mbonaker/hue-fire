@@ -1,0 +1,164 @@
+body {
+	background: #1c1b22;
+	color: #eeeeee;
+	padding: 0;
+	color-scheme: dark;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	margin: 0;
+	width: 800px;
+}
+.pickers {
+	display: flex;
+	flex-direction: row;
+}
+.picker {
+	border-left: 1px solid hsla(0, 0%, 50%, 0.5);
+	padding: 10px;
+}
+.picker > h3:first-of-type {
+	margin-top: 0;
+}
+.pickers > div:first-of-type {
+	border-left: none;
+}
+.color-list {
+	border-top: 1px solid gray;
+	display: flex;
+	flex-direction: row;
+	justify-content: stretch;
+	align-content: baseline;
+	position: relative;
+}
+.color-list h3, .color-list .color, .color-set-selector h3, .color-set-selector .color-set {
+	border-right: 1px solid gray;
+	height: 30px;
+	cursor: default;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	font-size: 1em;
+	line-height: 1em;
+	padding: 0 10px;
+}
+.color-list .values {
+	flex-grow: 1;
+	display: flex;
+	flex-wrap: wrap;
+}
+.color-list h3, .color-set-selector h3 {
+	margin: 0;
+}
+.color-list .color {
+	--color: transparent;
+	background: var(--color);
+	text-align: right;
+	width: 4.8em;
+	height: 30px;
+	box-sizing: border-box;
+}
+.color-list .input {
+	display: flex;
+	flex-direction: row;
+}
+
+.color-list .color.bright {
+	color: black;
+}
+.color-list .color.dark {
+	color: white;
+}
+
+.color-set-selector .sets {
+	display: flex;
+	flex-direction: row;
+	flex-grow: 1;
+}
+
+.color-set {
+	--reference-color: #444;
+	background-color: var(--reference-color);
+	position: relative;
+}
+
+.color-set.bright-reference-color {
+	color: black;
+}
+
+.color-set.dark-reference-color {
+	color: white;
+}
+
+.color-set:not(.show-context-menu) .context-menu, .color-list .color:not(.show-context-menu) .context-menu {
+	display: none;
+}
+
+.color-set .context-menu, .color-list .color .context-menu {
+	padding: 0;
+	position: absolute;
+	display: flex;
+	z-index: 100;
+	background: black;
+	left: 0;
+	top: 0;
+	transform: translateY(-100%);
+}
+
+.color-set-selector {
+	display: flex;
+	border-top: 1px solid hsla(0, 0%, 50%, 0.5);
+	align-content: baseline;
+	flex-wrap: wrap;
+}
+
+form.new-selection {
+	display: flex;
+}
+
+.color-set-selector .color-set .context-menu button,
+.color-list .color .context-menu button {
+	background: black;
+	border: 1px solid #888;
+	padding: 5px 10px;
+	margin-right: -1px;
+}
+
+.fraction-picker {
+	display: flex;
+	flex-direction: column;
+}
+
+.fraction-picker .line {
+	display: flex;
+	flex-direction: row;
+}
+
+.fraction-picker h3 {
+	margin: 10px;
+}
+
+.fraction-picker .control {
+	display: flex;
+}
+
+.fraction-picker .control button,
+.color-list .input button,
+.color-list .input input,
+.color-set-selector .new-selection button,
+.color-set-selector .new-selection input {
+	height: 26px;
+	box-sizing: border-box;
+	margin: 2px;
+}
+
+.fraction-picker .control button,
+.color-list .input button,
+.color-set-selector .new-selection button {
+	width: 26px;
+}
+
+.fraction-picker .canvas-container {
+	display: flex;
+	flex-grow: 1;
+}
