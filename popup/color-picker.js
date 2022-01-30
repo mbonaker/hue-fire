@@ -127,7 +127,13 @@ storageManager.getResolutionManager().then(manager => {
 		document.querySelector('.color-set-selector .new-selection').addEventListener('submit', e => {
 			e.preventDefault();
 			const textInput = e.target.querySelector('input[type="text"]');
-			colorSetCollection.addColorSet(new ColorSet(textInput.value, selection.copy()));
+			let colorSet;
+			if (textInput.value.startsWith('{')) {
+				colorSet = ColorSet.fromObject(JSON.parse(textInput.value));
+			} else {
+				colorSet = new ColorSet(textInput.value, selection.copy());
+			}
+			colorSetCollection.addColorSet(colorSet);
 			textInput.value = "";
 			saveColorSetCollection();
 		})

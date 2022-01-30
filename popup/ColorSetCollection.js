@@ -31,18 +31,18 @@ export default class ColorSetCollection {
 		const saveButton = document.createElement('button');
 		const renameButton = document.createElement('button');
 		const removeButton = document.createElement('button');
-		// const editCodeButton = document.createElement('button');
-		loadButton.textContent = 'load';
-		saveButton.textContent = 'save';
-		renameButton.textContent = 'rename';
-		removeButton.textContent = 'remove';
-		// editCodeButton.textContent = 'edit';
+		const copyButton = document.createElement('button');
+		loadButton.textContent = 'Load';
+		saveButton.textContent = 'Save';
+		renameButton.textContent = 'Rename';
+		removeButton.textContent = 'Remove';
+		copyButton.textContent = 'Copy as JSON';
 		contextMenu.append(
 			loadButton,
 			saveButton,
 			renameButton,
-			removeButton
-			// editCodeButton
+			removeButton,
+			copyButton,
 		);
 
 		div.textContent = colorSet.name;
@@ -75,6 +75,10 @@ export default class ColorSetCollection {
 				this.removeColorSet(colorSet, div);
 				this._save();
 			}
+		});
+		copyButton.addEventListener('click', e => {
+			e.preventDefault();
+			navigator.clipboard.writeText(JSON.stringify(colorSet.toObject()));
 		});
 
 		this.setReferenceColor(div, colorSet.colorSelectionManager.reference.value);
