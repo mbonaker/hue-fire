@@ -14,6 +14,8 @@ const storageManager = new StorageManager();
 let selection = new ColorSelectionManager();
 selection.reference.value = chroma.lch(80, 80, 80);
 
+let pickerSelectionChangeListeners = [];
+
 function appendPicker(picker) {
 	const div = document.createElement('div');
 	div.classList.add('picker');
@@ -23,7 +25,7 @@ function appendPicker(picker) {
 	const checkContainer = document.createElement('div');
 	checkContainer.classList.add('checkbox-container');
 	const checkLabel = document.createElement('label');
-	checkLabel.textContent = 'allow negative';
+	checkLabel.textContent = 'incl. compl.';
 	checkLabel.setAttribute('for', 'display-complementary-color-' + picker.type);
 	const displayComplementsCheckbox = document.createElement('input');
 	displayComplementsCheckbox.type = 'checkbox';
@@ -38,18 +40,30 @@ function appendPicker(picker) {
 	checkContainer.append(displayComplementsCheckbox);
 	const barHeader = document.createElement('h3');
 	planeHeaderLine.append(planeHeader);
+	let setPlaneHeader;
 	if (picker instanceof LchChromaColorPicker) {
-		planeHeader.textContent = 'Constant Chroma';
-		barHeader.textContent = 'Available Chromas';
+		setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[1])} C.`;
+		barHeader.textContent = 'Other Chromas';
 	}
 	if (picker instanceof LchLuminosityColorPicker) {
-		planeHeader.textContent = 'Constant Luminosity';
-		barHeader.textContent = 'Available Luminosities';
+		setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[0])} L.`;
+		barHeader.textContent = 'Other Luminosities';
 	}
 	if (picker instanceof LchHueColorPicker) {
-		planeHeader.textContent = 'Constant Hue';
-		barHeader.textContent = 'Available Hues';
+		setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[2])} H.`;
+		barHeader.textContent = 'Other Hues';
 	}
+
+	let oldSelection = selection;
+	pickerSelectionChangeListeners.push(newSelection => {
+		oldSelection.reference.removeChangeListener(setPlaneHeader);
+		newSelection.reference.addChangeListener(setPlaneHeader);
+		setPlaneHeader(newSelection.reference.value);
+		oldSelection = newSelection;
+	});
+	selection.reference.addChangeListener(setPlaneHeader);
+	setPlaneHeader(selection.reference.value);
+
 	planeHeaderLine.append(checkContainer);
 	div.append(planeHeaderLine);
 	div.append(picker.canvas);
@@ -60,6 +74,13 @@ function appendPicker(picker) {
 		displayComplementsCheckbox.checked = isActive;
 		picker.displayComplementaryColor = isActive;
 	}).then(() => picker.initPlane());
+}
+
+function setPickerSelection(colorPicker, newSelection) {
+	colorPicker.colorSelectionManager = newSelection;
+	for (const f of pickerSelectionChangeListeners) {
+		f(newSelection);
+	}
 }
 
 /**
@@ -146,7 +167,7 @@ storageManager.getResolutionManager().then(manager => {
 		colorSetCollection.addActiveColorSelectionChangeListener(newSelection => {
 			colorSetUi.setColorSelectionManager(newSelection);
 			for (const colorPicker of colorPickers) {
-				colorPicker.colorSelectionManager = newSelection;
+				setPickerSelection(colorPicker, newSelection);
 			}
 			selection = newSelection;
 		});
