@@ -111,6 +111,9 @@ storageManager.getResolutionManager().then(manager => {
 	const colorSetUi = new ColorSetUi(document.querySelector('.color-list .values'), document.getElementById('color-item-template'), selection, setGradient0, setGradient1);
 	colorSetUi.setColorSelectionManager(selection);
 	document.addEventListener('keyup', (e) => {
+		if (e.target.matches('input')) {
+			return;
+		}
 		if (e.key === '+') {
 			resolutionManager.increaseRenderResolution();
 			e.preventDefault();
