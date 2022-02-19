@@ -55,6 +55,8 @@ export default class PlaneColorPicker {
 	 */
 	_barImageData;
 	_removeColorSelectionManagerListeners = null;
+	_displayComplementaryColor = false;
+	_renderable = false;
 
 	/**
 	 * @param {Document} document
@@ -93,10 +95,21 @@ export default class PlaneColorPicker {
 			this._checkHover(x, y);
 			this._selection.contemplation.value = this._getColor(x, y);
 		});
+		this._canvas.addEventListener('mouseleave', ev => {
+			for (const point of this._selection.points) {
+				point.hoverStop();
+			}
+			this._selection.contemplation.value = this._selection.reference.value;
+		});
 		this._barCanvas = document.createElement('canvas');
 		this._barCanvasS = document.createElement('canvas');
 		this._barContext = this._barCanvas.getContext('2d');
 		this._barContextS = this._barCanvasS.getContext('2d');
+	}
+
+	set displayComplementaryColor(active) {
+		this._displayComplementaryColor = active;
+		this.refreshPlane();
 	}
 
 	_checkHover(x, y) {
@@ -189,6 +202,9 @@ export default class PlaneColorPicker {
 	}
 
 	refreshPlane() {
+		if (!this._renderable) {
+			return Promise.resolve();
+		}
 		const [sw, sh] = this._resolutionManager.getPlaneRenderResolution();
 		this._canvasS.width = sw;
 		this._canvasS.height = sh;
@@ -207,6 +223,9 @@ export default class PlaneColorPicker {
 	}
 
 	drawPlane() {
+		if (!this._renderable) {
+			return Promise.resolve();
+		}
 		const [rw, rh] = this._resolutionManager.getPlaneDisplayResolution();
 		this._canvas.width = rw;
 		this._canvas.height = rh;
@@ -217,6 +236,9 @@ export default class PlaneColorPicker {
 	}
 
 	drawPoints() {
+		if (!this._renderable) {
+			return Promise.resolve();
+		}
 		for (const point of this._selection.points) {
 			if (!point.isHovered) {
 				this.renderNewPoint(point);
@@ -231,6 +253,9 @@ export default class PlaneColorPicker {
 	}
 
 	generateBar() {
+		if (!this._renderable) {
+			return Promise.resolve();
+		}
 		const [sw] = this._resolutionManager.getPlaneRenderResolution();
 		this._barCanvasS.width = Math.round(sw);
 		this._barCanvasS.height = 30;
@@ -251,6 +276,9 @@ export default class PlaneColorPicker {
 	}
 
 	drawBar() {
+		if (!this._renderable) {
+			return Promise.resolve();
+		}
 		const [rw] = this._resolutionManager.getPlaneDisplayResolution();
 		this._barCanvas.width = rw;
 		this._barCanvas.height = this._barCanvasS.height;
@@ -351,6 +379,15 @@ export default class PlaneColorPicker {
 				point.removeHoverListener(drawPlane);
 			}
 		};
+		this.refreshPlane();
+	}
+
+	get type() {
+		throw "Not implemented";
+	}
+
+	initPlane() {
+		this._renderable = true;
 		this.refreshPlane();
 	}
 }

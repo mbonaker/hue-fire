@@ -24,8 +24,8 @@ export default class FractionColorPicker {
 		this._resolutionManager.addChangeListener(() => {
 			this.generate();
 		});
-		this._startColor = new LchColor(0, 1, 181);
-		this._endColor = new LchColor(50, 10, 0);
+		this._startColor = new LchColor(0, 0, 0);
+		this._endColor = new LchColor(0, 0, 0);
 		this._rw = width;
 		this._canvas.addEventListener('mousemove', ev => {
 			this._refreshHoveredSpot(... this._coordsFromPointerEvent(ev));
@@ -86,7 +86,7 @@ export default class FractionColorPicker {
 
 	get startColor() {
 		let [l, c, h] = this._startColor.lch();
-		if (c < 0.1) {
+		if (Math.abs(c) < 0.1) {
 			h = this._endColor.lch()[2];
 			return new LchColor(l, c, h);
 		} else {
@@ -96,7 +96,7 @@ export default class FractionColorPicker {
 
 	get endColor() {
 		let [l, c, h] = this._endColor.lch();
-		if (c < 0.1) {
+		if (Math.abs(c) < 0.1) {
 			h = this._startColor.lch()[2];
 			return new LchColor(l, c, h);
 		} else {
@@ -166,7 +166,7 @@ export default class FractionColorPicker {
 	}
 
 	_getHueDelta(h0, h1) {
-		const [h0l, h0m, h0h] = [h0 % 360 - 360, h0 % 360, h0 % 360 + 360];
+		const [h0l, h0m, h0h] = [h0 - 360, h0, h0 + 360];
 		const [dl, dm, dh] = [h1 - h0l, h1 - h0m, h1 - h0h];
 		const [al, am, ah] = [dl, dm, dh].map(Math.abs);
 		if (al < am && al < ah) {

@@ -15,11 +15,29 @@ let selection = new ColorSelectionManager();
 selection.reference.value = chroma.lch(80, 80, 80);
 
 function appendPicker(picker) {
-	picker.refreshPlane().then(() => {});
 	const div = document.createElement('div');
 	div.classList.add('picker');
 	const planeHeader = document.createElement('h3');
+	const planeHeaderLine = document.createElement('div');
+	planeHeaderLine.classList.add('line');
+	const checkContainer = document.createElement('div');
+	checkContainer.classList.add('checkbox-container');
+	const checkLabel = document.createElement('label');
+	checkLabel.textContent = 'allow negative';
+	checkLabel.setAttribute('for', 'display-complementary-color-' + picker.type);
+	const displayComplementsCheckbox = document.createElement('input');
+	displayComplementsCheckbox.type = 'checkbox';
+	displayComplementsCheckbox.title = 'Display complementary colors too';
+	displayComplementsCheckbox.classList.add('display-complementary-color');
+	displayComplementsCheckbox.setAttribute('id', 'display-complementary-color-' + picker.type);
+	displayComplementsCheckbox.addEventListener('change', ev => {
+		picker.displayComplementaryColor = displayComplementsCheckbox.checked;
+		storageManager.setDisplayComplementActive(picker.type, displayComplementsCheckbox.checked);
+	});
+	checkContainer.append(checkLabel);
+	checkContainer.append(displayComplementsCheckbox);
 	const barHeader = document.createElement('h3');
+	planeHeaderLine.append(planeHeader);
 	if (picker instanceof LchChromaColorPicker) {
 		planeHeader.textContent = 'Constant Chroma';
 		barHeader.textContent = 'Available Chromas';
@@ -32,11 +50,16 @@ function appendPicker(picker) {
 		planeHeader.textContent = 'Constant Hue';
 		barHeader.textContent = 'Available Hues';
 	}
-	div.append(planeHeader);
+	planeHeaderLine.append(checkContainer);
+	div.append(planeHeaderLine);
 	div.append(picker.canvas);
 	div.append(barHeader);
 	div.append(picker.barCanvas);
 	document.querySelector('.pickers').appendChild(div);
+	return storageManager.isDisplayComplementActive(picker.type).then(isActive => {
+		displayComplementsCheckbox.checked = isActive;
+		picker.displayComplementaryColor = isActive;
+	}).then(() => picker.initPlane());
 }
 
 /**

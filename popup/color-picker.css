@@ -13,6 +13,21 @@ body {
 	display: flex;
 	flex-direction: row;
 }
+.pickers .line {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+	justify-content: space-between;
+}
+.pickers .line .checkbox-container {
+	display: flex;
+	flex-direction: row;
+	align-items: baseline;
+}
+
+.pickers .line h3 {
+	margin-top: 0;
+}
 .picker {
 	border-left: 1px solid hsla(0, 0%, 50%, 0.5);
 	padding: 10px;
@@ -157,6 +172,7 @@ form.new-selection {
 .color-list .input button,
 .color-set-selector .new-selection button {
 	width: 26px;
+	text-align: center;
 }
 
 .fraction-picker .canvas-container {

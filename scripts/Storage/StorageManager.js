@@ -3,10 +3,7 @@ import ColorSet from "./ColorSet.js";
 
 export default class StorageManager {
 	_getStorage() {
-		// if (typeof browser !== "undefined")
-		// 	return browser.storage.sync;
-		// else
-			return chrome.storage.sync;
+		return chrome.storage.sync;
 	}
 
 	getColorSets() {
@@ -25,7 +22,7 @@ export default class StorageManager {
 
 	/**
 	 * @param {ColorSet[]} colorSets
-	 * @returns {Promise<unknown>}
+	 * @returns {Promise}
 	 */
 	setColorSets(colorSets) {
 		const colorSetObjects = [];
@@ -64,6 +61,35 @@ export default class StorageManager {
 					'sh': sh,
 				}
 			}, resolve);
+		});
+	}
+
+	isDisplayComplementActive(type) {
+		return new Promise(resolve => {
+			this._getStorage().get(['isDisplayComplementActive'], result => {
+				if (typeof result['isDisplayComplementActive'] !== 'undefined' && typeof result['isDisplayComplementActive'][type] !== 'undefined') {
+					resolve(result['isDisplayComplementActive'][type]);
+				} else {
+					resolve(null);
+				}
+			});
+		});
+	}
+
+	setDisplayComplementActive(type, isActive) {
+		return new Promise(resolve => {
+			this._getStorage().get(['isDisplayComplementActive'], result => {
+				let object;
+				if (typeof result['isDisplayComplementActive'] !== 'undefined') {
+					object = result['isDisplayComplementActive'];
+				} else {
+					object = {};
+				}
+				object[type] = isActive;
+				this._getStorage().set({
+					'isDisplayComplementActive': object,
+				}, resolve);
+			});
 		});
 	}
 }
