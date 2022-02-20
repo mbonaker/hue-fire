@@ -54,6 +54,7 @@ export default class PlaneColorPicker {
 	 * @type {ImageData} _barImageData
 	 */
 	_barImageData;
+	_barHovered = false;
 	_removeColorSelectionManagerListeners = null;
 	_displayComplementaryColor = false;
 	_renderable = false;
@@ -105,6 +106,39 @@ export default class PlaneColorPicker {
 		this._barCanvasS = document.createElement('canvas');
 		this._barContext = this._barCanvas.getContext('2d');
 		this._barContextS = this._barCanvasS.getContext('2d');
+		this._barCanvas.addEventListener('mousemove', ev => {
+			const elRect = this._barCanvas.getBoundingClientRect();
+			const [rw,] = this._resolutionManager.getPlaneDisplayResolution();
+			const x = (ev.clientX - elRect.left) / rw;
+			const y = (ev.clientY - elRect.top) / this._barCanvas.height;
+			this._checkHoverBar(x, y);
+			this._selection.contemplation.value = this._getBarColor(x, y);
+		});
+		this._barCanvas.addEventListener('mouseenter', ev => {
+			this._barHovered = true;
+		});
+		this._barCanvas.addEventListener('mouseleave', ev => {
+			for (const point of this._selection.points) {
+				point.hoverStop();
+			}
+			this._selection.contemplation.value = this._selection.reference.value;
+			this._barHovered = false;
+		});
+		this._barCanvas.addEventListener('click', ev => {
+			const elRect = this._barCanvas.getBoundingClientRect();
+			const [rw,] = this._resolutionManager.getPlaneDisplayResolution();
+			const x = (ev.clientX - elRect.left) / rw;
+			const y = (ev.clientY - elRect.top) / this._barCanvas.height;
+			if (ev.altKey) {
+				this._selection.reference.value = this._getBarColor(x, y);
+			} else {
+				const color = this._pickBarColor(x);
+				const point = new ColorSelectionPoint(color);
+				point.value = color;
+				this._selection.addPoint(point);
+				this._checkHoverBar(x, y);
+			}
+		});
 	}
 
 	set displayComplementaryColor(active) {
@@ -134,6 +168,9 @@ export default class PlaneColorPicker {
 		}
 	}
 
+	_checkHoverBar(x, y) {
+	}
+
 	_getColor(x, y) {
 		for (const point of this._selection.points) {
 			if (point.isHovered) {
@@ -141,6 +178,10 @@ export default class PlaneColorPicker {
 			}
 		}
 		return this._pickColor(x, y);
+	}
+
+	_getBarColor(x, y) {
+		return this._pickBarColor(x);
 	}
 
 	/**
@@ -288,7 +329,7 @@ export default class PlaneColorPicker {
 		this._barContext.setTransform(1, 0, 0, 1, 0, 0);
 
 
-		const x = this._locateBarColor(this._selection.contemplation.value);
+		const x = this._locateBarColor(this._barHovered ? this._selection.reference.value : this._selection.contemplation.value);
 		this._barContext.beginPath();
 		this._barContext.moveTo(x * rw, 0);
 		this._barContext.lineTo(x * rw, 30);
