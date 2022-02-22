@@ -201,7 +201,13 @@ export default class FractionColorPicker {
 		const [l1, c1, h1] = this.endColor.lch();
 		const [ld, cd, hd] = [l1 - l0, c1 - c0, this._getHueDelta(h0, h1)];
 		const [lx, cx, hx] = [ld * xs + l0, cd * xs + c0, hd * xs + h0];
-		return new LchColor(lx, cx, hx);
+		let h = hx;
+		if (h < 0) {
+			h = 360 - (Math.abs(h) % 360);
+		} else {
+			h = h % 360;
+		}
+		return new LchColor(lx, cx, h);
 	}
 
 	_refreshHoveredSpot(xs, sy) {
