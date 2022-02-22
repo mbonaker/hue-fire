@@ -27,16 +27,16 @@ export default class LchPlaneColorPicker extends PlaneColorPicker {
 	}
 	xToChroma(x) {
 		if (this._displayComplementaryColor) {
-			return (x - 0.5) * 250;
+			return (x - 0.5) * 280;
 		} else {
-			return x * 125;
+			return x * 280 / 2;
 		}
 	}
 	chromaToX(chroma) {
 		if (this._displayComplementaryColor) {
-			return chroma / 250 + 0.5;
+			return chroma / 280 + 0.5;
 		} else {
-			return chroma / 125;
+			return chroma / 280 * 2;
 		}
 	}
 	xToLuminosity(x) {
