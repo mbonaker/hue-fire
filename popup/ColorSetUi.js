@@ -86,6 +86,10 @@ export default class ColorSetUi {
 			}
 		});
 
+		if (color === this._selection.reference) {
+			colorDiv.classList.add('reference');
+		}
+
 		for (const button of colorDiv.querySelectorAll('.context-menu-action')) {
 			if (button.dataset.action === 'remove' && color === this._selection.reference) {
 				button.remove();

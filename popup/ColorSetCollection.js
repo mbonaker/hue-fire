@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import ColorSetCollectionButton from "./ColorSetCollectionButton.js";
+
 export default class ColorSetCollection {
 	/** @type {HTMLDivElement} */
 	_e;
@@ -24,6 +26,10 @@ export default class ColorSetCollection {
 	_activeColorSelectionChangeListeners = [];
 	_colorSets;
 	_save;
+	/** @type {ColorSetCollectionButton[]} */
+	_colorSetButtons = [];
+	/** @type {ColorSetCollectionButton} */
+	_activeColorSetButton = null;
 
 	constructor(element, saveFn) {
 		this._e = element;
@@ -41,90 +47,35 @@ export default class ColorSetCollection {
 	 * @param {ColorSet} colorSet
 	 */
 	addColorSet(colorSet) {
-		const div = document.createElement('div');
-		div.classList.add('color-set');
-		const contextMenu = document.createElement('div');
-		contextMenu.classList.add('context-menu');
-		const loadButton = document.createElement('button');
-		const saveButton = document.createElement('button');
-		const renameButton = document.createElement('button');
-		const removeButton = document.createElement('button');
-		const copyButton = document.createElement('button');
-		loadButton.textContent = 'Load';
-		saveButton.textContent = 'Save';
-		renameButton.textContent = 'Rename';
-		removeButton.textContent = 'Remove';
-		copyButton.textContent = 'Copy as JSON';
-		contextMenu.append(
-			loadButton,
-			saveButton,
-			renameButton,
-			removeButton,
-			copyButton,
-		);
-
-		div.textContent = colorSet.name;
-		colorSet.addNameChangeListener(newName => {
-			div.textContent = newName;
-		});
-
-		loadButton.addEventListener('click', e => {
-			e.preventDefault();
+		const button = new ColorSetCollectionButton(colorSet);
+		button.addLoadListener(() => {
 			this.activeColorSelection = colorSet.colorSelectionManager.copy();
+			if (this._activeColorSetButton) {
+				this._activeColorSetButton.unload()
+			}
+			this._activeColorSetButton = colorSet;
 		});
-		saveButton.addEventListener('click', e => {
-			e.preventDefault();
+		button.addSaveListener(() => {
 			colorSet.colorSelectionManager.assimilate(this._activeColorSelection);
-			this.setReferenceColor(div, colorSet.colorSelectionManager.reference.value);
 			this._save();
 		});
-		renameButton.addEventListener('click', e => {
-			e.preventDefault();
-			const newName = prompt(`New name for "${colorSet.name}":`);
-			if (newName !== null) {
-				colorSet.name = newName;
-				this._save();
-			}
+		button.addRenameListener(() => {
+			this._save();
 		});
-		removeButton.addEventListener('click', e => {
-			e.preventDefault();
-			const ok = confirm(`Do you really want to delete "${colorSet.name}"?`);
-			if (ok) {
-				this.removeColorSet(colorSet, div);
-				this._save();
-			}
-		});
-		copyButton.addEventListener('click', e => {
-			e.preventDefault();
-			navigator.clipboard.writeText(JSON.stringify(colorSet.toObject()));
+		button.addRemoveListener(() => {
+			this.removeColorSet(button);
+			this._save();
 		});
 
-		this.setReferenceColor(div, colorSet.colorSelectionManager.reference.value);
-		div.append(contextMenu);
-		div.tabIndex = 0;
-		div.addEventListener('click', e => {
-			e.preventDefault();
-			div.focus();
-			div.classList.toggle('show-context-menu');
-		});
-		div.addEventListener('blur', e => {
-			if (!e.currentTarget.contains(e.relatedTarget)) {
-				div.classList.remove('show-context-menu');
-			}
-		});
-		this._e.querySelector('.sets').append(div);
+		this._e.querySelector('.sets').append(button.htmlElement);
 
 		this._colorSets.push(colorSet);
+		this._colorSetButtons.push(button);
 	}
 
-	setReferenceColor(div, color) {
-		div.style.setProperty('--reference-color', color.hex());
-		if (color.lch()[0] > 80) {
-			div.classList.add('bright-reference-color');
-			div.classList.remove('dark-reference-color');
-		} else {
-			div.classList.add('dark-reference-color');
-			div.classList.remove('bright-reference-color');
+	saveCurrent() {
+		if (this._activeColorSetButton === null) {
+			this.makeBaseSet().save();
 		}
 	}
 
@@ -139,12 +90,19 @@ export default class ColorSetCollection {
 		return [... this._colorSets];
 	}
 
-	removeColorSet(colorSet, div) {
-		div.remove();
-		this._colorSets = this._colorSets.filter(x => x !== colorSet);
+	/**
+	 * @param {ColorSetCollectionButton} colorSetButton
+	 */
+	removeColorSet(colorSetButton) {
+		colorSetButton.htmlElement.remove();
+		this._colorSets = this._colorSets.filter(x => x !== colorSetButton.colorSet);
 	}
 
 	addActiveColorSelectionChangeListener(f) {
 		this._activeColorSelectionChangeListeners.push(f);
+	}
+
+	makeBaseSet() {
+
 	}
 }
