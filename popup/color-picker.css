@@ -58,28 +58,31 @@ body {
 	border-left: none;
 }
 .color-list {
-	border-top: 1px solid gray;
 	display: flex;
 	flex-direction: row;
 	justify-content: stretch;
 	align-content: baseline;
 	position: relative;
 }
-.color-list h3, .color-list .color, .color-set-selector h3, .color-set-selector .color-set {
-	border-right: 1px solid gray;
-	height: 30px;
+.color-list h3, .color-set-selector h3, .color-set-selector .color-set {
+	height: auto;
 	cursor: default;
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 	font-size: 1em;
 	line-height: 1em;
-	padding: 0 10px;
+	justify-content: space-around;
+	overflow: hidden;
+	text-align: center;
 }
 .color-list .values {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 2em);
+	grid-template-rows: repeat(auto-fill, 2em);
+	gap: 5px;
+	margin: 5px;
 	flex-grow: 1;
-	display: flex;
-	flex-wrap: wrap;
 }
 .color-list h3, .color-set-selector h3 {
 	margin: 0;
@@ -87,14 +90,15 @@ body {
 .color-list .color {
 	--color: transparent;
 	background: var(--color);
-	text-align: right;
-	width: 4.8em;
-	height: 30px;
-	box-sizing: border-box;
+	aspect-ratio: 1 / 1;
+}
+.color-list .color.reference {
+	grid-area: 1 / 1 / 3 / 3;
 }
 .color-list .input {
 	display: flex;
 	flex-direction: row;
+	align-items: stretch;
 }
 
 .color-list .color.bright {
@@ -105,9 +109,13 @@ body {
 }
 
 .color-set-selector .sets {
-	display: flex;
-	flex-direction: row;
+	display: grid;
+	grid-template-columns: repeat(12, 1fr);
+	grid-auto-rows: 3em;
 	flex-grow: 1;
+	gap: 5px;
+	width: min-content;
+	margin: 0 5px 5px;
 }
 
 .color-set {
@@ -141,7 +149,6 @@ body {
 
 .color-set-selector {
 	display: flex;
-	border-top: 1px solid hsla(0, 0%, 50%, 0.5);
 	align-content: baseline;
 	flex-wrap: wrap;
 }
@@ -182,7 +189,6 @@ form.new-selection {
 .color-list .input input,
 .color-set-selector .new-selection button,
 .color-set-selector .new-selection input {
-	height: 26px;
 	box-sizing: border-box;
 	margin: 2px;
 }
