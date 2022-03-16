@@ -110,4 +110,24 @@ export default class StorageManager {
 			});
 		});
 	}
+
+	getCurrentSelectionIndex() {
+		return new Promise(resolve => {
+			this._getStorage().get(['selectionIndex'], result => {
+				if (typeof result['selectionIndex'] !== 'undefined') {
+					resolve(result['selectionIndex']);
+				} else {
+					resolve(null);
+				}
+			});
+		});
+	}
+
+	setCurrentSelectionIndex(newIndex) {
+		return new Promise (resolve => {
+			this._getStorage().set({
+				'selectionIndex': newIndex,
+			}, resolve);
+		});
+	}
 }

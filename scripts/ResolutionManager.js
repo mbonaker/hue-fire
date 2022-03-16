@@ -20,8 +20,8 @@ export default class ResolutionManager {
 	_sw = 50;
 	_sh = 50;
 
-	_rw = 246;
-	_rh = 246;
+	_rw = 263;
+	_rh = 263;
 
 	_resolutionChangeListeners = [];
 

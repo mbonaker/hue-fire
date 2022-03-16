@@ -75,7 +75,7 @@ export default class ColorSetUi {
 	_addColor(color, name) {
 		const colorDiv = this._colorTemplate.content.querySelector('.color').cloneNode(true);
 
-		colorDiv.addEventListener('click', e => {
+		colorDiv.addEventListener('contextmenu', e => {
 			e.preventDefault();
 			colorDiv.focus();
 			colorDiv.classList.toggle('show-context-menu');
@@ -104,6 +104,7 @@ export default class ColorSetUi {
 					case 'gradient-1': this._setGradient0(currentColor); break;
 					case 'gradient-2': this._setGradient1(currentColor); break;
 				}
+				colorDiv.classList.remove('show-context-menu');
 			});
 		}
 
@@ -111,6 +112,10 @@ export default class ColorSetUi {
 
 		this._el.append(colorDiv);
 		return {colorDiv};
+	}
+
+	removeHtml() {
+		this._el.remove();
 	}
 
 	_copyHex(color) {
@@ -162,7 +167,7 @@ export default class ColorSetUi {
 	/**
 	 * @param {ColorSelectionManager} selection
 	 */
-	setColorSelectionManager(selection) {
+	set colorSelectionManager(selection) {
 		this._selection = selection;
 		this._points.forEach(([, , rmFn]) => rmFn());
 		this._points.splice(0, this._points.length);
@@ -189,6 +194,10 @@ export default class ColorSetUi {
 		};
 		this._selectionChangeListeners.push(onSelectionChangeListener);
 		this._onReferenceValueChange();
+	}
+
+	get colorSelectionManager() {
+		return this._selection;
 	}
 
 	_onReferenceValueChange() {

@@ -40,9 +40,9 @@ export default class LchPlaneColorPicker extends PlaneColorPicker {
 		}
 	}
 	xToLuminosity(x) {
-		return x * 200 - 50;
+		return x * 100;
 	}
 	luminosityToX(luminosity) {
-		return (luminosity + 50) / 200;
+		return (luminosity) / 100;
 	}
 }

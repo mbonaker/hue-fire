@@ -274,7 +274,7 @@ export default class PlaneColorPicker {
 				img.data[y * 4 * img.width + x * 4] = color._rgb._unclipped[0];
 				img.data[y * 4 * img.width + x * 4 + 1] = color._rgb._unclipped[1];
 				img.data[y * 4 * img.width + x * 4 + 2] = color._rgb._unclipped[2];
-				img.data[y * 4 * img.width + x * 4 + 3] = color.clipped() ? 0 : 255;
+				img.data[y * 4 * img.width + x * 4 + 3] = color.clipped() ? color.hcl()[2] / 100 * 100 + 80 : 255;
 			}
 		}
 		this._contextS.putImageData(img, 0, 0);
@@ -324,7 +324,7 @@ export default class PlaneColorPicker {
 			img.data[x * 4] = color._rgb._unclipped[0];
 			img.data[x * 4 + 1] = color._rgb._unclipped[1];
 			img.data[x * 4 + 2] = color._rgb._unclipped[2];
-			img.data[x * 4 + 3] = color.clipped() ? 0 : 255;
+			img.data[x * 4 + 3] = color.clipped() ? color.hcl()[2] / 100 * 100 + 80 : 255;
 		}
 		for (let y = 0; y < img.height; y++) {
 			img.data.copyWithin(img.width * y * 4, 0, img.width * 4);

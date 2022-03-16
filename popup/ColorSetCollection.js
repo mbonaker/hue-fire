@@ -17,6 +17,10 @@
  */
 
 import ColorSetCollectionButton from "./ColorSetCollectionButton.js";
+import ColorSetUi from "./ColorSetUi.js";
+import ColorSet from "../scripts/Storage/ColorSet.js";
+import ColorSelectionManager from "../scripts/ColorSelectionManager.js";
+import LchColor from "../scripts/LchColor.js";
 
 export default class ColorSetCollection {
 	/** @type {HTMLDivElement} */
@@ -24,16 +28,14 @@ export default class ColorSetCollection {
 	/** @type {ColorSelectionManager} */
 	_activeColorSelection;
 	_activeColorSelectionChangeListeners = [];
-	_colorSets;
+	_colorSetAddListeners = [];
+	/** @type {ColorSet[]} */
+	_colorSets = [];
+	_colorSetItemElements = new Map();
 	_save;
-	/** @type {ColorSetCollectionButton[]} */
-	_colorSetButtons = [];
-	/** @type {ColorSetCollectionButton} */
-	_activeColorSetButton = null;
 
 	constructor(element, saveFn) {
 		this._e = element;
-		this._colorSets = [];
 		this._save = saveFn;
 	}
 
@@ -41,42 +43,93 @@ export default class ColorSetCollection {
 		for (const colorSet of colorSets) {
 			this.addColorSet(colorSet);
 		}
+		this._e.querySelector('.close').addEventListener('click', event => {
+			event.preventDefault();
+			this.close();
+		});
+		this._e.querySelector('.headline .new').addEventListener('click', e => {
+			e.preventDefault();
+			const newSetString = prompt('Paste palette JSON (beginning with "{") or just type the name of a new empty palette.');
+			let colorSet;
+			if (newSetString === null) {
+				return;
+			} else if (newSetString.startsWith('{')) {
+				colorSet = ColorSet.fromObject(JSON.parse(newSetString));
+			} else {
+				colorSet = new ColorSet(newSetString, new ColorSelectionManager());
+				colorSet.colorSelectionManager.reference.value = new LchColor(0, 0, 0);
+			}
+			this.addColorSet(colorSet);
+			this._save();
+		});
+	}
+
+	close() {
+		this._e.dataset.state = 'closed';
 	}
 
 	/**
 	 * @param {ColorSet} colorSet
 	 */
 	addColorSet(colorSet) {
-		const button = new ColorSetCollectionButton(colorSet);
-		button.addLoadListener(() => {
-			this.activeColorSelection = colorSet.colorSelectionManager.copy();
-			if (this._activeColorSetButton) {
-				this._activeColorSetButton.unload()
-			}
-			this._activeColorSetButton = colorSet;
-		});
-		button.addSaveListener(() => {
-			colorSet.colorSelectionManager.assimilate(this._activeColorSelection);
+		const list = document.createElement('div');
+		list.classList.add('color-list');
+		const header = document.createElement('input');
+		header.type = 'text';
+		header.value = colorSet.name;
+		header.classList.add('color-set-name');
+		header.addEventListener('change', ev => {
+			colorSet.name = header.value;
 			this._save();
 		});
-		button.addRenameListener(() => {
-			this._save();
+		const dragger = document.createElement('div');
+		dragger.classList.add('dragger');
+		const actionsContainer = document.createElement('div');
+		actionsContainer.classList.add('actions-container');
+		const loadButton = document.createElement('button');
+		loadButton.classList.add('load-button');
+		loadButton.textContent = 'Load';
+		loadButton.addEventListener('click', ev => {
+			this.activeColorSelection = colorSet.colorSelectionManager;
+			this.close();
 		});
-		button.addRemoveListener(() => {
-			this.removeColorSet(button);
-			this._save();
+		const deleteButton = document.createElement('button');
+		deleteButton.classList.add('delete-button');
+		deleteButton.textContent = 'Delete';
+		deleteButton.addEventListener('click', ev => {
+			ev.preventDefault();
+			if (confirm(`Removing ${colorSet.name}... This is your last chance to cancel!`))
+				this.removeColorSet(colorSet);
 		});
-
-		this._e.querySelector('.sets').append(button.htmlElement);
+		const copyButton = document.createElement('button');
+		copyButton.classList.add('copy-button');
+		copyButton.textContent = 'Copy JSON';
+		copyButton.addEventListener('click', ev => {
+			ev.preventDefault();
+			navigator.clipboard.writeText(JSON.stringify(colorSet.toObject()));
+		});
+		const item = document.createElement('div');
+		item.classList.add('color-set-selector-item');
+		actionsContainer.append(deleteButton, loadButton, copyButton);
+		item.append(dragger, list, header, actionsContainer);
+		this._e.append(item);
+		const ui = new ColorSetUi(list, document.getElementById('color-item-template'), colorSet.colorSelectionManager, () => {}, () => {});
+		ui.colorSelectionManager = colorSet.colorSelectionManager;
 
 		this._colorSets.push(colorSet);
-		this._colorSetButtons.push(button);
+		this._colorSetItemElements.set(colorSet, item);
+
+		for (const f of this._colorSetAddListeners) {
+			f(colorSet);
+		}
+	}
+
+	addColorSetAddListener(f) {
+		this._colorSetAddListeners.push(f);
 	}
 
 	saveCurrent() {
-		if (this._activeColorSetButton === null) {
-			this.makeBaseSet().save();
-		}
+		this._save();
 	}
 
 	set activeColorSelection(colorSelection) {
@@ -90,19 +143,30 @@ export default class ColorSetCollection {
 		return [... this._colorSets];
 	}
 
+	get selectionIndex() {
+		for (let i = 0; i < this._colorSets.length; i++) {
+			if (this._activeColorSelection === this._colorSets[i].colorSelectionManager) {
+				return i;
+			}
+		}
+		throw "No color set selected!";
+	}
+
 	/**
-	 * @param {ColorSetCollectionButton} colorSetButton
+	 * @param {ColorSet} colorSet
 	 */
-	removeColorSet(colorSetButton) {
-		colorSetButton.htmlElement.remove();
-		this._colorSets = this._colorSets.filter(x => x !== colorSetButton.colorSet);
+	removeColorSet(colorSet) {
+		this._colorSetItemElements.get(colorSet).remove();
+		this._colorSets = this._colorSets.filter(x => x.colorSelectionManager !== colorSet.colorSelectionManager);
+		this._colorSetItemElements.delete(colorSet);
+		this._save();
 	}
 
 	addActiveColorSelectionChangeListener(f) {
 		this._activeColorSelectionChangeListeners.push(f);
 	}
 
-	makeBaseSet() {
-
+	open() {
+		this._e.dataset.state = 'open';
 	}
 }

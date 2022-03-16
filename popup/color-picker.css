@@ -27,44 +27,38 @@ body {
 	margin: 0;
 	width: 800px;
 	font-size: 12px;
-}
-.pickers {
-	display: flex;
-	flex-direction: row;
-}
-.pickers .line {
-	display: flex;
-	flex-direction: row;
-	align-items: baseline;
-	justify-content: space-between;
-}
-.pickers .line .checkbox-container {
-	display: flex;
-	flex-direction: row;
-	align-items: baseline;
+	--main-spacing: 5px;
 }
 
-.pickers .line h3 {
-	margin-top: 0;
+canvas {
+	background: #000;
 }
-.picker {
-	border-left: 1px solid hsla(0, 0%, 50%, 0.5);
-	padding: 10px;
-}
-.picker > h3:first-of-type {
-	margin-top: 0;
-}
-.pickers > div:first-of-type {
-	border-left: none;
-}
-.color-list {
+
+.pickers {
+	--picker-space: var(--main-spacing);
 	display: flex;
 	flex-direction: row;
-	justify-content: stretch;
-	align-content: baseline;
-	position: relative;
+	gap: var(--picker-space);
+	margin: var(--picker-space) var(--picker-space) 0;
 }
-.color-list h3, .color-set-selector h3, .color-set-selector .color-set {
+.picker {
+	display: flex;
+	flex: 0 1 auto;
+	flex-direction: column;
+	gap: var(--picker-space);
+}
+.picker canvas {
+	width: 100%;
+}
+.color-list {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, 2em);
+	grid-template-rows: repeat(auto-fill, 2em);
+	gap: var(--main-spacing);
+	flex-grow: 1;
+	padding: var(--main-spacing);
+}
+.color-set-selector .color-set {
 	height: auto;
 	cursor: default;
 	display: flex;
@@ -75,29 +69,17 @@ body {
 	justify-content: space-around;
 	text-align: center;
 }
-.color-list .values {
-	display: grid;
-	grid-template-columns: repeat(auto-fill, 2em);
-	grid-template-rows: repeat(auto-fill, 2em);
-	gap: 5px;
-	margin: 5px;
-	flex-grow: 1;
+.color-list .new {
+	display: flex;
+	order: 10;
 }
-.color-list h3, .color-set-selector h3 {
-	margin: 0;
-}
-.color-list .color {
+.color-list > * {
 	--color: transparent;
 	background: var(--color);
 	aspect-ratio: 1 / 1;
 }
 .color-list .color.reference {
 	grid-area: 1 / 1 / 3 / 3;
-}
-.color-list .input {
-	display: flex;
-	flex-direction: row;
-	align-items: stretch;
 }
 
 .color-list .color.bright {
@@ -112,30 +94,20 @@ body {
 	grid-template-columns: repeat(12, 1fr);
 	grid-auto-rows: 3em;
 	flex-grow: 1;
-	gap: 5px;
+	gap: var(--main-spacing);
 	width: min-content;
-	margin: 0 5px 5px;
+	margin: 0 var(--main-spacing) var(--main-spacing);
 }
 
-.color-set {
-	--reference-color: #444;
-	background-color: var(--reference-color);
+.color-list {
 	position: relative;
 }
 
-.color-set.bright-reference-color {
-	color: black;
-}
-
-.color-set.dark-reference-color {
-	color: white;
-}
-
-.color-set:not(.show-context-menu) .context-menu, .color-list .color:not(.show-context-menu) .context-menu {
+.color-list .color:not(.show-context-menu) .context-menu {
 	display: none;
 }
 
-.color-set .context-menu, .color-list .color .context-menu {
+.color-list .color .context-menu {
 	padding: 0;
 	position: absolute;
 	display: flex;
@@ -146,17 +118,37 @@ body {
 	transform: translateY(-100%);
 }
 
+.color-set-selector[data-state="closed"] {
+	display: none;
+}
+
 .color-set-selector {
 	display: flex;
 	align-content: baseline;
+	flex-direction: column;
+	position: absolute;
+	left: 0;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	background: #000;
+	overflow: auto;
+}
+
+.color-set-selector-item {
+	display: flex;
 	flex-wrap: wrap;
+}
+
+.color-set-selector-item:hover {
+	background: #222;
 }
 
 form.new-selection {
 	display: flex;
+	order: 10;
 }
 
-.color-set-selector .color-set .context-menu button,
 .color-list .color .context-menu button {
 	background: black;
 	border: 1px solid #888;
@@ -168,6 +160,15 @@ form.new-selection {
 .fraction-picker {
 	display: flex;
 	flex-direction: column;
+	margin: var(--main-spacing) var(--main-spacing) 0;
+}
+
+.fraction-picker canvas {
+	flex: 1 0 auto;
+}
+
+.fraction-picker.unused {
+	display: none;
 }
 
 .fraction-picker .line {
@@ -184,8 +185,6 @@ form.new-selection {
 }
 
 .fraction-picker .control button,
-.color-list .input button,
-.color-list .input input,
 .color-set-selector .new-selection button,
 .color-set-selector .new-selection input {
 	box-sizing: border-box;
@@ -193,7 +192,6 @@ form.new-selection {
 }
 
 .fraction-picker .control button,
-.color-list .input button,
 .color-set-selector .new-selection button {
 	width: 26px;
 	text-align: center;
@@ -202,4 +200,127 @@ form.new-selection {
 .fraction-picker .canvas-container {
 	display: flex;
 	flex-grow: 1;
+}
+
+.show-complements {
+	padding: 0;
+	display: flex;
+	align-items: center;
+	border: 0;
+}
+
+.status-line {
+	display: flex;
+	height: 2em;
+	gap: 0;
+}
+
+.show-current {
+	flex-grow: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	padding: 0 0 0 var(--main-spacing);
+}
+
+.status-line button {
+	background: none;
+	border: 0 none;
+}
+
+.status-line button:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.status-line button, .status-line fieldset {
+	padding: 0 10px;
+}
+
+input.color-set-name {
+	background: none;
+	border: none;
+	padding: 0;
+	font-style: italic;
+	font-size: 1em;
+	position: absolute;
+	top: 5px;
+	margin: 0;
+	left: calc(5px + 2em);
+	width: 100px;
+	color: white;
+	height: 2em;
+}
+
+.color-set-selector-item .actions-container {
+	display: flex;
+	flex-direction: row;
+	visibility: hidden;
+}
+
+.color-set-selector-item:hover .actions-container {
+	visibility: visible;
+}
+
+.color-set-selector-item .actions-container button {
+	flex: 1 0 auto;
+	background: none;
+	border: 0 none;
+	width: min-content;
+}
+
+.color-set-selector-item .actions-container button:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.headline {
+	position: sticky;
+	top: 0;
+	background: #222;
+	display: flex;
+	justify-content: space-between;
+	box-shadow: 0 0 7px 0px black;
+	z-index: 10;
+}
+
+.color-set-selector .headline button {
+	background: none;
+	border: none;
+	padding: 0 10px;
+	cursor: pointer;
+	display: flex;
+	margin-top: -0.1em;
+	width: 3em;
+	height: 3em;
+	align-items: center;
+	justify-content: center;
+	min-width: max-content;
+}
+
+.color-set-selector .headline > button:hover {
+	background: rgba(255, 255, 255, 0.2);
+}
+
+.color-set-selector-item {
+	position: relative;
+}
+
+.color-set-selector .color-list .color.reference {
+	grid-area: 1 / 1 / 2 / 5;
+	aspect-ratio: auto;
+}
+
+.dragger::before {
+	content: '=';
+	margin-top: -0.2em;
+}
+
+.dragger {
+	display: flex;
+	width: 2em;
+	justify-content: center;
+	align-items: center;
+}
+
+.color-set-selector .color-list {
+	padding-left: 0;
 }
