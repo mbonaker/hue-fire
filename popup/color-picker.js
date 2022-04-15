@@ -41,7 +41,7 @@ storageManager.getColorSets().then(colorSets => {
 	} else {
 		let colorSet = new ColorSet("unnamed", new ColorSelectionManager());
 		do {
-            colorSet.colorSelectionManager.reference.value = chroma.hcl(Math.random() * 360, Math.random() * 100, Math.random() * 100);
+			colorSet.colorSelectionManager.reference.value = chroma.lch(Math.random() * 100, Math.random() * 100, Math.random() * 360);
 		} while (colorSet.colorSelectionManager.reference.value.clipped());
 		init([colorSet], colorSet);
 	}
@@ -119,8 +119,8 @@ function init(colorSets, colorSet) {
 			saveColorSetCollection();
 		});
 		newSelection.contemplation.addChangeListener(newColor => {
-			const [h, c, l] = newColor.hcl();
-			statusLineElement.textContent = `hcl(${Math.round(h)}°, ${Math.round(c)}, ${Math.round(l)}%)`;
+			const [l, c, h] = newColor.lch();
+			statusLineElement.textContent = `lch(${Math.round(l)}%, ${Math.round(c)}, ${Math.round(h)}°)`;
 		});
 	});
 	colorSetCollection.activeColorSelection = selection;
@@ -128,9 +128,9 @@ function init(colorSets, colorSet) {
 	storageManager.getResolutionManager().then(manager => {
 		const resolutionManager = manager;
 		const colorPickers = [
-			new LchHueColorPicker(document, resolutionManager, selection),
-			new LchChromaColorPicker(document, resolutionManager, selection),
 			new LchLuminosityColorPicker(document, resolutionManager, selection),
+			new LchChromaColorPicker(document, resolutionManager, selection),
+			new LchHueColorPicker(document, resolutionManager, selection),
 		];
 		for (const colorPicker of colorPickers) {
 			appendPicker(colorPicker);

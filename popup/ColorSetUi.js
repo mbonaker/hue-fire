@@ -124,7 +124,7 @@ export default class ColorSetUi {
 
 	_copyLch(color) {
 		const [l, c, h] = color.lch().map(Math.round);
-		navigator.clipboard.writeText(`${l}, ${c}, ${h}`);
+		navigator.clipboard.writeText(color.css('lch'));
 	}
 
 	_updateColor(color, div) {

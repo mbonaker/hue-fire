@@ -237,7 +237,7 @@ export default class FractionColorPicker {
 			img.data[x * 4] = color._rgb._unclipped[0];
 			img.data[x * 4 + 1] = color._rgb._unclipped[1];
 			img.data[x * 4 + 2] = color._rgb._unclipped[2];
-			img.data[x * 4 + 3] = color.clipped() ? color.hcl()[2] / 100 * 100 + 80 : 255;
+			img.data[x * 4 + 3] = color.clipped() ? color.lch()[0] / 100 * 100 + 80 : 255;
 		}
 		for (let y = 0; y < img.height; y++) {
 			img.data.copyWithin(img.width * y * 4, 0, img.width * 4);

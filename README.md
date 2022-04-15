@@ -1,18 +1,18 @@
-This addon adds a color picker to the extension icon bar. However while most color pickers work with the <acronym title="Hue Saturation Lightness">HSL</acronym> color space, this one works with the <acronym title="Hue Chroma Luminosity">HCL</acronym> (or <acronym title="Luminosity Chroma Hue">LCH</acronym>) color space.
+This addon adds a color picker to the extension icon bar. However while most color pickers work with the <acronym title="Hue Saturation Lightness">HSL</acronym> color space, this one works with the <acronym title="Luminosity Chroma Hue">LCH</acronym> color space.
 
 <b>Why is this color picker so different?</b>
 
 TL;DR: This color picker is based around how colors are <i>perceived</i>, not how they are <i>emitted</i>.
 
-In this color picker you can select the <i>perceived</i> luminosity of a color, the <i>perceived</i> chroma and the <i>perceived</i> hue. In other words, this is an HCL color picker.
+In this color picker you can select the <i>perceived</i> luminosity of a color, the <i>perceived</i> chroma and the <i>perceived</i> hue. In other words, this is an LCH color picker.
 
-For contrast: Most color pickers let you  pick a color by its hue, saturation and lightness. In those kinds of color pickers the lightness scales linearly with the physical lightness that the screen presumably (not necessarily acurately) emits. However, if you try to read white text on <code>hsl(120, 100%, 50%)</code> a.k.a. <code>#00ff00</code> a.k.a. "intense green", you will barely be able to do so, if at all. White text on <code>hsl(240, 100%, 50%)</code> a.k.a. <code>#0000ff</code> a.k.a. "intense blue" is very natural and can be read without any problems even though the green and the blue have the same "lightness" values. In HCL on the other hand <code>#00ff00</code> is represented as <code>hcl(136, 120, 88)</code> and <code>#0000ff</code> is represented as <code>hcl(306, 134, 32)</code>. The difference in "luminosity" is 88 to 32 which matches the difference in perception.
+For contrast: Most color pickers let you  pick a color by its hue, saturation and lightness. In those kinds of color pickers the lightness scales linearly with the physical lightness that the screen presumably (not necessarily acurately) emits. However, if you try to read white text on <code>hsl(120, 100%, 50%)</code> a.k.a. <code>#00ff00</code> a.k.a. "intense green", you will barely be able to do so, if at all. White text on <code>hsl(240, 100%, 50%)</code> a.k.a. <code>#0000ff</code> a.k.a. "intense blue" is very natural and can be read without any problems even though the green and the blue have the same "lightness" values. In HCL on the other hand <code>#00ff00</code> is represented as <code>lch(88, 120, 136)</code> and <code>#0000ff</code> is represented as <code>lch(32, 134, 306)</code>. The difference in "luminosity" is 88 to 32 which matches the difference in perception.
 
 <b>Functions</b>
 
 <ul>
  <li>View and select colors on the C/L plane, the H/L plane or the H/C plane</li>
- <li>View and select colors on the H, C and L bars</li>
+ <li>View and select colors on the L, C and H bars</li>
  <li>View and select colors on the gradient of any arbitrary two colors with equal spacing (by adding more dots via the "+" next to the gradient tool)
  <ul>
   <li>To set a color as the start of the gradient you have to first add it to the palette and then click on it and select the according option</li>
