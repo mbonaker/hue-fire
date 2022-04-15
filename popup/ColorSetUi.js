@@ -75,6 +75,14 @@ export default class ColorSetUi {
 	_addColor(color, name) {
 		const colorDiv = this._colorTemplate.content.querySelector('.color').cloneNode(true);
 
+		colorDiv.addEventListener('mouseenter', e => {
+			e.preventDefault();
+			this._selection._contemplation.value = color.value;
+		});
+		colorDiv.addEventListener('mouseleave', e => {
+			e.preventDefault();
+			this._selection._contemplation.value = this._selection.reference.value;
+		});
 		colorDiv.addEventListener('contextmenu', e => {
 			e.preventDefault();
 			colorDiv.focus();
