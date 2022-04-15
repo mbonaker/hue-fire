@@ -83,6 +83,10 @@ export default class ColorSetUi {
 			e.preventDefault();
 			this._selection._contemplation.value = this._selection.reference.value;
 		});
+		colorDiv.addEventListener('click', e => {
+			e.preventDefault();
+			this._selection.reference.value = color.value;
+		});
 		colorDiv.addEventListener('contextmenu', e => {
 			e.preventDefault();
 			colorDiv.focus();
@@ -105,6 +109,7 @@ export default class ColorSetUi {
 			button.addEventListener('click', event => {
 				const currentColor = new LchColor(parseFloat(colorDiv.dataset.l), parseFloat(colorDiv.dataset.c), parseFloat(colorDiv.dataset.h));
 				event.preventDefault();
+				event.stopPropagation();
 				switch (button.dataset.action) {
 					case 'copy-hex': this._copyHex(currentColor); break;
 					case 'copy-lch': this._copyLch(currentColor); break;
