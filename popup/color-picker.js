@@ -56,32 +56,7 @@ function init(colorSets, colorSet) {
 	function appendPicker(picker) {
 		const div = document.createElement('div');
 		div.classList.add('picker');
-		const planeHeader = document.createElement('h3');
-		const planeHeaderLine = document.createElement('div');
-		planeHeaderLine.classList.add('line');
-		planeHeaderLine.append(planeHeader);
-		let setPlaneHeader;
-		if (picker instanceof LchChromaColorPicker) {
-			setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[1])} C.`;
-		}
-		if (picker instanceof LchLuminosityColorPicker) {
-			setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[0])} L.`;
-		}
-		if (picker instanceof LchHueColorPicker) {
-			setPlaneHeader = color => planeHeader.textContent = `Colors With ${Math.round(color.lch()[2])} H.`;
-		}
 
-		let oldSelection = selection;
-		pickerSelectionChangeListeners.push(newSelection => {
-			oldSelection.reference.removeChangeListener(setPlaneHeader);
-			newSelection.reference.addChangeListener(setPlaneHeader);
-			setPlaneHeader(newSelection.reference.value);
-			oldSelection = newSelection;
-		});
-		selection.reference.addChangeListener(setPlaneHeader);
-		setPlaneHeader(selection.reference.value);
-
-		// div.append(planeHeaderLine);
 		div.append(picker.canvas);
 		div.append(picker.barCanvas);
 		document.querySelector('.pickers').appendChild(div);

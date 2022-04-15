@@ -89,7 +89,7 @@ export default class PlaneColorPicker {
 		this._contextS = this._canvasS.getContext("2d");
 		this._resolutionManager = resolutionManager;
 		this.colorSelectionManager = selection;
-		this._resolutionManager.addChangeListener(color => this.refreshPlane());
+		this._resolutionManager.addChangeListener(color => this.generatePlane().then(this.generateBar));
 		requestAnimationFrame(() => this.generateBar());
 		this._canvas.addEventListener('click', ev => {
 			const elRect = this._canvas.getBoundingClientRect();
@@ -161,7 +161,7 @@ export default class PlaneColorPicker {
 
 	set displayComplementaryColor(active) {
 		this._displayComplementaryColor = active;
-		this.refreshPlane();
+		this.generatePlane();
 	}
 
 	_checkHover(x, y) {
@@ -260,7 +260,7 @@ export default class PlaneColorPicker {
 		return this._barCanvas;
 	}
 
-	refreshPlane() {
+	generatePlane() {
 		if (!this._renderable) {
 			return Promise.resolve();
 		}
@@ -278,7 +278,7 @@ export default class PlaneColorPicker {
 			}
 		}
 		this._contextS.putImageData(img, 0, 0);
-		return this.drawPlane();
+		return this.drawPlane().then(() => this.generateBar());
 	}
 
 	drawPlane() {
@@ -291,7 +291,7 @@ export default class PlaneColorPicker {
 		this._context.scale(rw / this._canvasS.width, rh / this._canvasS.height);
 		this._context.drawImage(this._canvasS, 0, 0);
 		this._context.setTransform(1, 0, 0, 1, 0, 0);
-		return this.drawPoints().then(() => this.generateBar());
+		return this.drawPoints();
 	}
 
 	drawPoints() {
@@ -425,7 +425,7 @@ export default class PlaneColorPicker {
 		this._selection.addPointAddListener(onAddPoint);
 		this._selection.addPointRemoveListener(onRemovePoint);
 
-		const onReferenceChange = color => this.refreshPlane();
+		const onReferenceChange = color => this.generatePlane();
 		const onContemplationChange = color => this.changeContemplatingColor(color);
 		this._selection.reference.addChangeListener(onReferenceChange);
 		this._selection.contemplation.addChangeListener(onContemplationChange);
@@ -438,7 +438,7 @@ export default class PlaneColorPicker {
 				point.removeHoverListener(drawPlane);
 			}
 		};
-		this.refreshPlane();
+		this.generatePlane();
 	}
 
 	get type() {
@@ -447,6 +447,6 @@ export default class PlaneColorPicker {
 
 	initPlane() {
 		this._renderable = true;
-		this.refreshPlane();
+		this.generatePlane();
 	}
 }
