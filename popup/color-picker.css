@@ -87,9 +87,13 @@ canvas {
 	justify-content: space-around;
 	text-align: center;
 }
-.color-list .new {
+.color-list .new,
+.color-list .pipette {
 	display: flex;
 	order: 10;
+}
+.color-list .pipette svg path {
+	fill: var(--main-text-color);
 }
 .color-list form button {
 	width: 100%;
@@ -146,11 +150,11 @@ canvas {
 	transform: translateY(-100%);
 }
 
-.color-set-selector[data-state="closed"] {
+.work-area[data-state="closed"] {
 	display: none;
 }
 
-.color-set-selector {
+.work-area {
 	display: flex;
 	align-content: baseline;
 	flex-direction: column;
@@ -260,6 +264,14 @@ button:active {
 	background: var(--main-background-highlight);
 }
 
+.color-pipette-area canvas {
+	cursor: url("/popup/pipette.svg"), default;
+}
+
+.color-pipette-area canvas.grabbing {
+	cursor: grabbing;
+}
+
 .status-line button {
 	background: none;
 	border: 0 none;
@@ -319,7 +331,13 @@ input.color-set-name {
 	z-index: 10;
 }
 
-.color-set-selector .headline button {
+.color-preview {
+	height: 100%;
+	aspect-ratio: 3 / 1;
+	background: var(--color);
+}
+
+.work-area .headline button {
 	background: none;
 	border: none;
 	padding: 0 10px;

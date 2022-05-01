@@ -26,6 +26,7 @@ import ColorSelectionPoint from "../scripts/ColorSelectionPoint.js";
 import ColorSetCollection from "./ColorSetCollection.js";
 import ColorSet from "../scripts/Storage/ColorSet.js";
 import ColorSetUi from "./ColorSetUi.js";
+import PipetteUi from "./PipetteUi.js";
 import FractionColorPicker from "../scripts/FractionColorPicker.js";
 
 const storageManager = new StorageManager();
@@ -168,6 +169,17 @@ function init(colorSets, colorSet) {
 			newPoint.value = lchColor;
 			selection.addPoint(newPoint);
 			colorSetCollection.saveCurrent();
+		});
+		const pipetteUi = new PipetteUi(document.querySelector('.color-pipette-area'), newColor => {
+			const newPoint = new ColorSelectionPoint();
+			newPoint.value = newColor;
+			selection.addPoint(newPoint);
+			colorSetCollection.saveCurrent();
+		});
+		document.querySelector('.color-list form.pipette').addEventListener('submit', ev => {
+			ev.preventDefault();
+			pipetteUi.open();
+			pipetteUi.takeScreenshot();
 		});
 		colorSetCollection.init(colorSets);
 		colorSetCollection.addActiveColorSelectionChangeListener(newSelection => {
