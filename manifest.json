@@ -34,7 +34,6 @@
     "storage",
     "contextMenus",
     "<all_urls>",
-    "activeTab",
-    "scripting"
+    "activeTab"
   ]
 }
