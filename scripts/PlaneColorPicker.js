@@ -17,6 +17,7 @@
  */
 
 import ColorSelectionPoint from "./ColorSelectionPoint.js";
+import LchColor from "./LchColor.js";
 
 export default class PlaneColorPicker {
 	/**
@@ -76,6 +77,14 @@ export default class PlaneColorPicker {
 	_removeColorSelectionManagerListeners = null;
 	_displayComplementaryColor = false;
 	_renderable = false;
+	/**
+	 * @type {Int8Array} _validColorMask
+	 */
+	_validColorMask = null;
+	/**
+	 * @type {ImageData} _validColorOverlay
+	 */
+	_validColorOverlay = null;
 
 	/**
 	 * @param {Document} document
@@ -268,16 +277,55 @@ export default class PlaneColorPicker {
 		this._canvasS.width = sw;
 		this._canvasS.height = sh;
 		const img = this._contextS.createImageData(sw, sh);
+		const capMask = new Int8Array(sw * sh);
 		for (let x = 0; x < img.width; x++) {
 			for (let y = 0; y < img.height; y++) {
 				let color = this._pickColor(x / img.width, y / img.height);
 				img.data[y * 4 * img.width + x * 4] = color._rgb._unclipped[0];
 				img.data[y * 4 * img.width + x * 4 + 1] = color._rgb._unclipped[1];
 				img.data[y * 4 * img.width + x * 4 + 2] = color._rgb._unclipped[2];
-				img.data[y * 4 * img.width + x * 4 + 3] = color.clipped() ? color.lch()[0] / 100 * 100 + 80 : 255;
+				img.data[y * 4 * img.width + x * 4 + 3] = 255;
+				capMask[y * img.width + x] = color.clipped() ? 1 : 0;
 			}
 		}
-		this._contextS.putImageData(img, 0, 0);
+		let drawOverlay = false;
+		const overlay = this._contextS.createImageData(sw, sh);
+		overlay.data.set(img.data);
+		for (let x = 0; x < img.width; x++) {
+			for (let y = 0; y < img.height; y++) {
+				const isBorder = !(x > 0 && x < img.width - 1 && y > 0 && y < img.height - 1);
+				const isCapped = !!capMask[y * img.width + x];
+				if (isBorder ^ isCapped) {
+					drawOverlay = false;
+					drawOverlay ||= (x + y) % 10 === 0;
+					drawOverlay &&= (x % 10 > 5) === (y % 10 > 5);
+					drawOverlay ||= isBorder;
+					drawOverlay ||= !capMask[(y - 1) * img.width + x];
+					drawOverlay ||= !capMask[(y + 1) * img.width + x];
+					drawOverlay ||= !capMask[y * img.width + (x - 1)];
+					drawOverlay ||= !capMask[y * img.width + (x + 1)];
+					if (drawOverlay) {
+						const [r, g, b] = [
+							overlay.data[y * 4 * img.width + x * 4],
+							overlay.data[y * 4 * img.width + x * 4 + 1],
+							overlay.data[y * 4 * img.width + x * 4 + 2]
+						];
+						const lchColor = new LchColor(... chroma(r, g, b).lch());
+						if (lchColor.l > 55) {
+							overlay.data[y * 4 * img.width + x * 4] = 0;
+							overlay.data[y * 4 * img.width + x * 4 + 1] = 0;
+							overlay.data[y * 4 * img.width + x * 4 + 2] = 0;
+						} else {
+							overlay.data[y * 4 * img.width + x * 4] = 255;
+							overlay.data[y * 4 * img.width + x * 4 + 1] = 255;
+							overlay.data[y * 4 * img.width + x * 4 + 2] = 255;
+						}
+					}
+				}
+			}
+		}
+		// this._contextS.putImageData(img, 0, 0);
+		this._contextS.putImageData(overlay, 0, 0);
 		return this.drawPlane().then(() => this.generateBar());
 	}
 
@@ -319,17 +367,53 @@ export default class PlaneColorPicker {
 		this._barCanvasS.width = Math.round(sw);
 		this._barCanvasS.height = 30;
 		const img = this._barContextS.createImageData(this._barCanvasS.width, this._barCanvasS.height);
+		const capMask = new Int8Array(this._barCanvasS.width);
 		for (let x = 0; x < img.width; x++) {
 			const color = this._pickBarColor(x / img.width);
 			img.data[x * 4] = color._rgb._unclipped[0];
 			img.data[x * 4 + 1] = color._rgb._unclipped[1];
 			img.data[x * 4 + 2] = color._rgb._unclipped[2];
-			img.data[x * 4 + 3] = color.clipped() ? color.lch()[0] / 100 * 100 + 80 : 255;
+			img.data[x * 4 + 3] = 255;
+			capMask[x] = color.clipped() ? 1 : 0;
 		}
 		for (let y = 0; y < img.height; y++) {
 			img.data.copyWithin(img.width * y * 4, 0, img.width * 4);
 		}
-		this._barContextS.putImageData(img, 0, 0);
+		const overlayedImg = this._barContextS.createImageData(this._barCanvasS.width, this._barCanvasS.height);
+		overlayedImg.data.set(img.data);
+		let drawOverlay = false;
+		for (let x = 0; x < img.width; x++) {
+			for (let y = 0; y < img.height; y++) {
+				const isBorder = !(x > 0 && x < img.width - 1 && y > 0 && y < img.height - 1);
+				const isCapped = !!capMask[x];
+				if (isCapped ^ isBorder) {
+					drawOverlay = false;
+					drawOverlay ||= (x + y) % 10 === 0;
+					drawOverlay &&= (x % 10 > 5) === (y % 10 > 5);
+					drawOverlay ||= isBorder;
+					drawOverlay ||= !capMask[x + 1];
+					drawOverlay ||= !capMask[x - 1];
+					if (drawOverlay) {
+						const [r, g, b] = [
+							overlayedImg.data[y * 4 * img.width + x * 4],
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1],
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2]
+						];
+						const lchColor = new LchColor(... chroma(r, g, b).lch());
+						if (lchColor.l > 55) {
+							overlayedImg.data[y * 4 * img.width + x * 4] = 0;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1] = 0;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2] = 0;
+						} else {
+							overlayedImg.data[y * 4 * img.width + x * 4] = 255;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1] = 255;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2] = 255;
+						}
+					}
+				}
+			}
+		}
+		this._barContextS.putImageData(overlayedImg, 0, 0);
 
 		return this.drawBar();
 	}

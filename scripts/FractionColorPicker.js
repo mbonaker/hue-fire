@@ -229,20 +229,57 @@ export default class FractionColorPicker {
 
 	generate() {
 		const [sw] = this._resolutionManager.getPlaneRenderResolution();
-		this._canvasS.width = Math.round(sw);
+		this._canvasS.width = Math.round(sw / 260 * this._rw);
 		this._canvasS.height = 30;
 		const img = this._contextS.createImageData(this._canvasS.width, this._canvasS.height);
+		const capMask = new Int8Array(this._canvasS.width);
 		for (let x = 0; x < img.width; x++) {
 			const color = this._pickColor(this._xrToXs(x / img.width * this._rw));
 			img.data[x * 4] = color._rgb._unclipped[0];
 			img.data[x * 4 + 1] = color._rgb._unclipped[1];
 			img.data[x * 4 + 2] = color._rgb._unclipped[2];
-			img.data[x * 4 + 3] = color.clipped() ? color.lch()[0] / 100 * 100 + 80 : 255;
+			img.data[x * 4 + 3] = 255;
+			capMask[x] = color.clipped() ? 1 : 0;
 		}
 		for (let y = 0; y < img.height; y++) {
 			img.data.copyWithin(img.width * y * 4, 0, img.width * 4);
 		}
-		this._contextS.putImageData(img, 0, 0);
+		const overlayedImg = this._contextS.createImageData(this._canvasS.width, this._canvasS.height);
+		overlayedImg.data.set(img.data);
+		let drawOverlay = false;
+		for (let x = 0; x < img.width; x++) {
+			for (let y = 0; y < img.height; y++) {
+				const isBorder = !(x > 0 && x < img.width - 1 && y > 0 && y < img.height - 1);
+				const isCapped = !!capMask[x];
+				if (isCapped ^ isBorder) {
+					drawOverlay = false;
+					drawOverlay ||= (x + y) % 10 === 0;
+					drawOverlay &&= (x % 10 > 5) === (y % 10 > 5);
+					drawOverlay ||= isBorder;
+					drawOverlay ||= !capMask[x + 1];
+					drawOverlay ||= !capMask[x - 1];
+					if (drawOverlay) {
+						const [r, g, b] = [
+							overlayedImg.data[y * 4 * img.width + x * 4],
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1],
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2]
+						];
+						const lchColor = new LchColor(... chroma(r, g, b).lch());
+						if (lchColor.l > 55) {
+							overlayedImg.data[y * 4 * img.width + x * 4] = 0;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1] = 0;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2] = 0;
+						} else {
+							overlayedImg.data[y * 4 * img.width + x * 4] = 255;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 1] = 255;
+							overlayedImg.data[y * 4 * img.width + x * 4 + 2] = 255;
+						}
+					}
+				}
+			}
+		}
+
+		this._contextS.putImageData(overlayedImg, 0, 0);
 
 		return this.draw();
 	}
